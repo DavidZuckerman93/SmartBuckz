@@ -1,0 +1,118 @@
+# SMARTBUCKZ - FULL STACK PROJECT DOCUMENTATION
+
+## 1. OVERVIEW
+SmartBuckz is a specialized financial platform designed for "Food-Only" wallet management. It allows users (Buyers) to create virtual cards, fund them from registered bank accounts, and use them for secure payments via QR codes. Sellers can accept payments and manage their earnings.
+
+---
+
+## 2. BACKEND ARCHITECTURE (Node.js, Express, MySQL)
+
+### Core Technologies
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Database**: MySQL (using `mysql2/promise` for async operations)
+- **Authentication**: JWT (JSON Web Tokens)
+- **Encryption**: bcryptjs (for password hashing)
+
+### Database Schema (Managed in `dbInit.js`)
+- **users**: Stores account details (name, email, phone, hashed password, role: BUYER/SELLER).
+- **wallets**: Stores the main balance for users.
+- **virtual_cards**: Stores virtual card data (alias, masked number, balance, expiry, CVV, default status, frozen status).
+- **bank_accounts**: Stores registered source banks for funding operations.
+- **transactions**: Logs every movement of funds (FUNDING, PURCHASE, WITHDRAWAL).
+- **qr_codes**: Stores paths to generated QR code images.
+
+### API Endpoints
+#### Authentication (`/api/auth`)
+- `POST /signup`: Register a new user and initialize a wallet.
+- `POST /login`: Authenticate and return a JWT token.
+
+#### Virtual Cards (`/api/virtual_cards`)
+- `GET /`: Retrieve all cards for the logged-in user.
+- `POST /create`: Generate a new virtual card with a unique QR code.
+- `PUT /:id/fund`: Add money to a specific card from a bank source.
+- `PUT /:id/default`: Set a card as the primary default card.
+
+#### Bank Accounts (`/api/bank_accounts`)
+- `GET /`: List all registered bank cards.
+- `POST /`: Register a new bank source.
+- `PUT /:id`: Update existing bank details.
+- `DELETE /:id`: Remove a bank source.
+
+#### Wallet & Transactions (`/api/wallet`)
+- `GET /`: Get current wallet balance and full transaction history.
+
+---
+
+## 3. FRONTEND ARCHITECTURE (React Native, Expo)
+
+### Core Technologies
+- **Framework**: React Native (via Expo)
+- **Navigation**: React Navigation (Stack and Bottom Tabs)
+- **State Management**: Context API (`UserContext.js`)
+- **API Client**: Axios (with interceptors for JWT injection)
+- **UI Components**: Lucide-React-Native (icons), Expo Linear Gradient.
+
+### Global State Management (`UserContext.js`)
+The `UserContext` acts as the brain of the app, handling:
+- **Authentication**: Managing the `user` object and JWT storage.
+- **Reactive Navigation**: Automatically switching between `AuthStack` and `BuyerTabs` based on login state.
+- **Unified Data**: Synchronizing wallet balances, virtual cards, and registered banks across all screens.
+
+### Key Screens & Features
+
+#### 1. Authentication (`/auth`)
+- **Selection**: Choose between Buyer and Seller roles.
+- **Login/Signup**: Standard forms with backend validation.
+
+#### 2. Virtual Cards (`/buyer/VirtualCardScreen`)
+- **Visuals**: Premium gradients and dynamic labels.
+- **Security**: Card number masking with an "Eye" toggle to reveal digits.
+- **Default Management**: Ability to set a card as default, which then reflects as the primary balance on the Home screen.
+- **QR Payment**: Instant "PAY" button to show the card's QR code.
+
+#### 3. Banking (`/buyer/BanksScreen`)
+- **CRUD Operations**: Register, View, Update, and Delete bank cards.
+- **Funding Sources**: These saved banks appear as options when topping up virtual cards.
+
+#### 4. Funding (`/buyer/CardFundingScreen`)
+- **Streamlined Workflow**: Select a card -> Enter amount -> Pick a saved bank -> Fund.
+- **Smart Formatting**: Currency abbreviations (e.g., 2k for 2,000) for better readability.
+
+#### 5. History (`/buyer/HistoryScreen`)
+- **Detailed Logs**: View all transactions categorized by All, Funding, or Purchases.
+- **Transaction Modal**: Detailed drill-down showing reference numbers, exact timestamps, and funding sources.
+
+---
+
+## 4. SECURITY FEATURES
+- **JWT Middleware**: Every sensitive backend request is protected by a token verification layer.
+- **Database Transactions**: Funding and Default-setting use SQL transactions to ensure data integrity.
+- **Masking**: Sensitive card digits are masked on the frontend to prevent shoulder surfing.
+- **QR Integrity**: Frozen status is embedded in QR codes to prevent unauthorized payments.
+
+---
+
+## 5. DIRECTORY STRUCTURE
+```text
+/Backend
+  /src
+    /api           # Backend Route Handlers
+    /config        # DB Connection
+    /middlewares   # JWT Auth Middleware
+    app.js         # Entry Point
+    dbInit.js      # Schema & Table Creation
+
+/src
+  /components      # Reusable UI (GlobalHeader, etc.)
+  /context         # UserContext.js (State)
+  /navigation      # RootNavigator.js (Routing)
+  /screens         # All App Screens
+  /services        # api.js (Axios services)
+  /theme           # colors.js
+```
+
+---
+*Documentation generated on 2026-03-24*
+
+COPYRIGHT SHOOTING STAR TECHNOLOGIES 2026

@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Ensure the app handles its own subdirectory if it's not in the root
+RewriteBase /PHPBackend/
+
+# Route everything to index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
